@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
+using Core;
 
 namespace TfvcToGitTool
 {
@@ -10,6 +12,14 @@ namespace TfvcToGitTool
     {
         static void Main(string[] args)
         {
+            string tfsUrl = args[0];
+            string path = args[1];
+
+            var tfs = new TFSUtil(tfsUrl);
+
+
+            var z = tfs.GetHistory(path);
+
         }
     }
 }
