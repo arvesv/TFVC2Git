@@ -20,6 +20,15 @@ namespace TfvcToGitTool
 
             var z = tfs.GetHistory(path);
 
+            foreach (var qE in z)
+            {
+                Console.WriteLine(qE.Id);
+                Console.WriteLine(qE.comment);
+                Console.WriteLine(qE.committerEmail);
+                Console.WriteLine(qE.commiterName);
+
+            }
+
         }
     }
 }
