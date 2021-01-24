@@ -15,7 +15,7 @@ namespace TfvcToGitTool
             string tfsUrl = args[0];
             string path = args[1];
 
-            var tfs = new TFSUtil(tfsUrl);
+            var tfs = new TfsUtil(tfsUrl);
 
 
             var z = tfs.GetHistory(path);

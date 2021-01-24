@@ -1,35 +1,25 @@
-﻿
-using Microsoft.VisualStudio.Services.Common;
-using Microsoft.TeamFoundation.SourceControl.WebApi;
-using Microsoft.VisualStudio.Services.WebApi;
-
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Microsoft.VisualStudio.Services.Common;
 
 namespace Core
 {
-    public class TFSUtil
+    public class TfsUtil
     {
-        private TfsTeamProjectCollection tfs;
-        private VersionControlServer vcServer;
+        private readonly VersionControlServer _vcServer;
 
-        public TFSUtil(string url)
+        public TfsUtil(string url)
         {
-            TfsTeamProjectCollection tfs = new TfsTeamProjectCollection(new Uri(url), new TfsClientCredentials());
-
-            vcServer = tfs.GetService<VersionControlServer>();
+            var tfs = new TfsTeamProjectCollection(new Uri(url), new VssCredentials());
+            _vcServer = tfs.GetService<VersionControlServer>();
         }
 
         //VssConnection vss 
         public int[] GetHistory(string path)
         {
-            var z = vcServer.QueryHistory(path, RecursionType.Full).ToArray();
+            var z = _vcServer.QueryHistory(path, RecursionType.Full).ToArray();
             
 
 
