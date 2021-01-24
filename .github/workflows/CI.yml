@@ -35,4 +35,4 @@ jobs:
         run: nuget restore TFVC2Git.sln
 
       - name: Compile the code
-        run: msbuild SimpleFrameworkApp.sln /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=FolderProfile
+        run: msbuild TFVC2Git.sln /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=FolderProfile
