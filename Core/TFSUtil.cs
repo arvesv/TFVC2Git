@@ -32,7 +32,6 @@ namespace Core
                 var member = _managementService.ReadIdentity(IdentitySearchFactor.AccountName, userid,
                     MembershipQuery.Direct, ReadIdentityOptions.ExtendedProperties);
 
-
                 string email;
 
                 if (member == null)
@@ -44,11 +43,10 @@ namespace Core
                     email = member.GetProperty("Mail").ToString().ToLower();
                 }
 
-                _emaillookup[userid] = email.ToString().ToLower();
+                _emaillookup[userid] = email;
             }
 
             return _emaillookup[userid];
-                
         }
 
 
@@ -59,6 +57,10 @@ namespace Core
 
             foreach (var changeset  in z)
             {
+                if (changeset.Comment.Length > 250)
+                {
+                    changeset.Comment = changeset.Comment.Substring(0, 250);
+                }
 
                 yield return  new CheckIn
                 {
