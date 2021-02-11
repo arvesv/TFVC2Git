@@ -11,7 +11,7 @@ namespace Core
     public class CheckIn
     {
         public int Id;
-        public string commiterName;
+        public string committerName;
         public string committerEmail;
         public string comment;
         public LocalDateTime date;

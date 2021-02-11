@@ -56,7 +56,7 @@ namespace TfvcToGitTool
                                         syncpath.TfsPath,
                                         ChangesetId = changeset.Id,
                                         Comment = changeset.comment,
-                                        Committer = changeset.commiterName,
+                                        Committer = changeset.committerName,
                                         CommitterEmail = changeset.committerEmail,
                                         CommitterDate = changeset.date
                                     }

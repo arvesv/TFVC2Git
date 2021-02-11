@@ -43,6 +43,16 @@ namespace Core
                     email = member.GetProperty("Mail").ToString().ToLower();
                 }
 
+
+                if (string.IsNullOrEmpty(email))
+                {
+                    email = "dontreply@agresso.no";
+                }
+
+                if (email.Contains(".old"))
+                {
+                    email = email.Replace(".old", "");
+                }
                 _emaillookup[userid] = email;
             }
 
@@ -55,23 +65,31 @@ namespace Core
         {
             var z = _vcServer.QueryHistory(path, RecursionType.Full);
 
-            foreach (var changeset  in z)
+            foreach (var changeset in z)
             {
-                if (changeset.Comment.Length > 250)
+                if (changeset != null && changeset.Comment != null)
                 {
-                    changeset.Comment = changeset.Comment.Substring(0, 250);
-                }
+                    if (changeset.Comment.Length > 250)
+                    {
+                        changeset.Comment = changeset.Comment.Substring(0, 250);
+                    }
 
-                yield return  new CheckIn
-                {
-                    Id = changeset.ChangesetId, 
-                    comment = changeset.Comment,
-                    date = LocalDateTime.FromDateTime(changeset.CreationDate),
-                    commiterName = changeset.CommitterDisplayName, 
-                    committerEmail = GetUserEmail(changeset.Committer, changeset.CommitterDisplayName)
-                };
+                    var name = changeset.CommitterDisplayName;
+                    if (name.Contains(" OLD"))
+                    {
+                        name = name.Replace(" OLD", "");
+                    }
+
+                    yield return new CheckIn
+                    {
+                        Id = changeset.ChangesetId,
+                        comment = changeset.Comment,
+                        date = LocalDateTime.FromDateTime(changeset.CreationDate),
+                        committerName = name,
+                        committerEmail = GetUserEmail(changeset.Committer, changeset.CommitterDisplayName)
+                    };
+                }
             }
         }
-
     }
 }
