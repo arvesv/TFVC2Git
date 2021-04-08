@@ -27,7 +27,11 @@ namespace DoMigration
 
             foreach (var area in areas)
             {
-                string gitlocal = (string) area.gitlocalpath;
+                string gitlocal = (string)area.gitlocalpath;
+
+                if (!Directory.Exists(gitlocal))
+                    continue;
+
                 int startchangeset = (int) area.lastchangeset;
 
                 var paths = connection.Query<syncpath>(
@@ -124,7 +128,7 @@ namespace DoMigration
         private static void UpdateTfsPath(string localtfspath, int commitid)
         {
             const string tfexe =
-                @"c:\Program Files (x86)\Microsoft Visual Studio\2017\TeamExplorer\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\TF.exe";
+                @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\tf.exe";
 
             if (!Directory.Exists(localtfspath))
             {
