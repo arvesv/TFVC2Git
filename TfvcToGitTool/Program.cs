@@ -4,6 +4,7 @@ using Core;
 using Core.Model;
 using Dapper;
 using Dapper.NodaTime;
+using Polly;
 
 namespace TfvcToGitTool
 {
@@ -14,12 +15,23 @@ namespace TfvcToGitTool
             DapperNodaTimeSetup.Register();
             var connectionString = args[0];
 
+            // A retry policy that hopefully works if the database is stopped
+            var policy = Policy
+                .Handle<SqlException>(ex => ex.Message.Contains("not currently available"))
+                .WaitAndRetry(new[]
+                {
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(3)
+                });
+
+          
             var connection = new SqlConnection(connectionString);
-            connection.Open();
+
+            policy.Execute(() => connection.Open());
 
             var syncpaths = connection.Query<SyncPath>(
                 "SELECT [TfsUrl], [TfsPath], [LastChangeSetId] FROM [TfsPathsToSync]");
-
 
             foreach (var syncpath in syncpaths)
             {
