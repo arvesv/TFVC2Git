@@ -43,6 +43,11 @@ namespace DoMigration
 
                 do
                 {
+                    int noCommitsToBeMerged = connection.QueryFirst<int>($"select count(*) from changesets where changesetid > {startchangeset} and TfsPath in {sqlpaths}");
+                    if (noCommitsToBeMerged == 0)
+                        break;
+
+
                     var commitid = connection.QueryFirst<int>(
                         $"select min(changesetid) from changesets where changesetid > {startchangeset} and TfsPath in {sqlpaths}");
 
@@ -121,6 +126,12 @@ namespace DoMigration
                     proc.Start();
                     proc.WaitForExit();
                     startchangeset = commitid;
+
+
+                    int count = connection.Execute("update MigStatus set lastchangeset = {startchangeset} where [gitlocalpath] = {gitlocal}");
+
+
+
                 } while (true);
             }
         }
