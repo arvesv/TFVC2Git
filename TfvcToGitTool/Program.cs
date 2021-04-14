@@ -15,14 +15,14 @@ namespace TfvcToGitTool
             DapperNodaTimeSetup.Register();
             var connectionString = args[0];
 
-            // A retry policy that hopefully works if the database is stopped
+            // A retry policy that hopefully works if the database is stopped  (it make take 1 minute to autostart)
             var policy = Policy
                 .Handle<SqlException>(ex => ex.Message.Contains("not currently available"))
                 .WaitAndRetry(new[]
                 {
-                    TimeSpan.FromSeconds(1),
-                    TimeSpan.FromSeconds(2),
-                    TimeSpan.FromSeconds(3)
+                    TimeSpan.FromSeconds(100),
+                    TimeSpan.FromSeconds(30),
+                    TimeSpan.FromSeconds(30)
                 });
 
           

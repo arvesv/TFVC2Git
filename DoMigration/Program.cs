@@ -128,7 +128,7 @@ namespace DoMigration
                     startchangeset = commitid;
 
 
-                    int count = connection.Execute("update MigStatus set lastchangeset = {startchangeset} where [gitlocalpath] = {gitlocal}");
+                    int count = connection.Execute($"update MigStatus set lastchangeset = {startchangeset} where [gitlocalpath] = '{gitRootPath}'");
 
 
 
