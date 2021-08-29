@@ -5,3 +5,8 @@ A tool for migrating TFS TFVC history to Git. NB. There might be better tools ou
 one Git repo.
 
 
+The dependencies:
+*   Windows and .NET 4.8 as we use the "old" TFS API
+*   SQL Server database. Works with a "serverless" Azure SQL (basically it reties for 1 minute in case the database must start. I did this to save cost)
+*	Visual Studio 2019 (or later?)
+
