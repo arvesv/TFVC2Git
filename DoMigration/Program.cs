@@ -118,8 +118,7 @@ namespace DoMigration
 
         private static void UpdateTfsPath(string localtfspath, int commitid)
         {
-            const string tfexe =
-                @"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\tf.exe";
+            string tfexe = Stuff.GetTFEXEPath();
 
             if (!Directory.Exists(localtfspath)) Directory.CreateDirectory(localtfspath);
 
