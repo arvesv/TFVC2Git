@@ -43,6 +43,8 @@
   <ItemGroup>
     <Compile Include="CheckIn.cs" />
     <Compile Include="Model\SyncPath.cs" />
+    <Compile Include="NodaTimeHelpers.cs" />
+    <Compile Include="Stuff.cs" />
     <Compile Include="TFSUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -85,6 +87,9 @@
     </PackageReference>
     <PackageReference Include="NodaTime">
       <Version>3.0.5</Version>
+    </PackageReference>
+    <PackageReference Include="Polly">
+      <Version>7.2.2</Version>
     </PackageReference>
     <PackageReference Include="System.IdentityModel.Tokens.Jwt">
       <Version>6.12.2</Version>

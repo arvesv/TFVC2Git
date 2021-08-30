@@ -1,49 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Core;
 using Dapper;
 using Dapper.NodaTime;
 
 namespace DoMigration
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             DapperNodaTimeSetup.Register();
             var connectionString = args[0];
 
             var connection = new SqlConnection(connectionString);
-            connection.Open();
+            Stuff.GetDbRetryPolicy().Execute(() => connection.Open());
 
 
             var areas = connection.Query<dynamic>("select [gitlocalpath], lastchangeset from MigStatus");
 
             foreach (var area in areas)
             {
-                string gitlocal = (string)area.gitlocalpath;
+                var gitlocal = (string)area.gitlocalpath;
 
                 if (!Directory.Exists(gitlocal))
                     continue;
 
-                int startchangeset = (int) area.lastchangeset;
+                var startchangeset = (int)area.lastchangeset;
 
                 var paths = connection.Query<syncpath>(
                         $"select gitrepolocalpath, tfslocalpath, tfspath from MigrationPaths where gitrepolocalpath like '{gitlocal}%'")
                     .ToArray();
 
 
-                string sqlpaths = "(\'" + string.Join("', '", paths.Select(p => p.tfspath)) + "\')";
+                var sqlpaths = "(\'" + string.Join("', '", paths.Select(p => p.tfspath)) + "\')";
 
                 do
                 {
-                    int noCommitsToBeMerged = connection.QueryFirst<int>($"select count(*) from changesets where changesetid > {startchangeset} and TfsPath in {sqlpaths}");
+                    var noCommitsToBeMerged = connection.QueryFirst<int>(
+                        $"select count(*) from changesets where changesetid > {startchangeset} and TfsPath in {sqlpaths}");
                     if (noCommitsToBeMerged == 0)
                         break;
 
@@ -57,30 +54,17 @@ namespace DoMigration
 
 
                     var tfsPaths = paths.Select(p => p.tfslocalpath).ToArray();
-                    var gitPaths = paths.Select(p => p.gitrepolocalpath).ToArray();
 
                     var tfsRootPath =
                         new string(
                             tfsPaths
                                 .First()
                                 .Substring(0, tfsPaths.Min(s => s.Length))
-                                .TakeWhile(((c, i) => tfsPaths.All(s => s[i] == c)))
-                                .ToArray());
-
-                    var gitRootPath =
-                        new string(
-                            gitPaths
-                                .First()
-                                .Substring(0, gitPaths.Min(s => s.Length))
-                                .TakeWhile(((c, i) => gitPaths.All(s => s[i] == c)))
+                                .TakeWhile((c, i) => tfsPaths.All(s => s[i] == c))
                                 .ToArray());
 
 
-                    foreach (var path in paths)
-                    {
-                        UpdateTfsPath(path.tfslocalpath, commitid);
-
-                    }
+                    foreach (var path in paths) UpdateTfsPath(path.tfslocalpath, commitid);
 
 
                     var proc = new Process
@@ -89,7 +73,7 @@ namespace DoMigration
                             $"/c Robocopy {tfsRootPath} . /MIR /XD .git /XF .gitattributes /XF .gitignore")
                         {
                             UseShellExecute = false,
-                            WorkingDirectory = gitRootPath
+                            WorkingDirectory = gitlocal
                         }
                     };
                     proc.Start();
@@ -97,30 +81,28 @@ namespace DoMigration
 
                     proc = new Process
                     {
-                        StartInfo = new ProcessStartInfo("cmd", $"/c git add .")
+                        StartInfo = new ProcessStartInfo("cmd", "/c git add .")
                         {
                             UseShellExecute = false,
-                            WorkingDirectory = gitRootPath
+                            WorkingDirectory = gitlocal
                         }
                     };
                     proc.Start();
                     proc.WaitForExit();
 
                     if (changeset.committerEmail == null)
-                    {
                         changeset.committerEmail = changeset.committerName.ToLower().Replace(' ', '.') + "@unit4.com";
-                    }
 
-                    var d = changeset.date.ToString();
+                    var d = changeset.date.ToStringWithOffset();
 
-                    string commitcli =
+                    var commitcli =
                         $"git commit -m '{changeset.comment}' -m 'https://team47system1.corp.u4agr.com/tfs/DefaultCollection/Platform/_versionControl/changeset/{changeset.Id}' --author '{changeset.committerName} <{changeset.committerEmail}>' --date '{d}'";
                     proc = new Process
                     {
                         StartInfo = new ProcessStartInfo(@"pwsh", $"-c {commitcli}")
                         {
                             UseShellExecute = false,
-                            WorkingDirectory = gitRootPath
+                            WorkingDirectory = gitlocal
                         }
                     };
                     proc.Start();
@@ -128,10 +110,8 @@ namespace DoMigration
                     startchangeset = commitid;
 
 
-                    int count = connection.Execute($"update MigStatus set lastchangeset = {startchangeset} where [gitlocalpath] = '{gitRootPath}'");
-
-
-
+                    connection.Execute(
+                        $"update MigStatus set lastchangeset = {startchangeset} where [gitlocalpath] = '{gitlocal}'");
                 } while (true);
             }
         }
@@ -139,12 +119,9 @@ namespace DoMigration
         private static void UpdateTfsPath(string localtfspath, int commitid)
         {
             const string tfexe =
-                @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\tf.exe";
+                @"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\tf.exe";
 
-            if (!Directory.Exists(localtfspath))
-            {
-                Directory.CreateDirectory(localtfspath);
-            }
+            if (!Directory.Exists(localtfspath)) Directory.CreateDirectory(localtfspath);
 
             var proc = new Process
             {
@@ -158,12 +135,6 @@ namespace DoMigration
             };
             proc.Start();
             proc.WaitForExit();
-
-            
-
-
-
-            
         }
     }
 }
