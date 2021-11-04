@@ -25,8 +25,8 @@ namespace Core
                 .WaitAndRetry(new[]
                 {
                     TimeSpan.FromSeconds(100),
-                    TimeSpan.FromSeconds(30),
-                    TimeSpan.FromSeconds(30)
+                    TimeSpan.FromSeconds(100),
+                    TimeSpan.FromSeconds(60)
                 });
         }
 

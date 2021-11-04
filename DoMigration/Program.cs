@@ -31,7 +31,7 @@ namespace DoMigration
                 var startchangeset = (int)area.lastchangeset;
 
                 var paths = connection.Query<syncpath>(
-                        $"select gitrepolocalpath, tfslocalpath, tfspath from MigrationPaths where gitrepolocalpath like '{gitlocal}%'")
+                        $"select gitrepolocalpath, tfslocalpath, tfspath from MigrationPaths where gitrepolocalpath like '{gitlocal}\\%'")
                     .ToArray();
 
 
